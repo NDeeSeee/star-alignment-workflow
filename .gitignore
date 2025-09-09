@@ -1,0 +1,38 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Data files (too large for git)
+data/sample_manifest.csv
+data/chunk_status.csv
+data/resource_config.json
+
+# Output directories
+outputs/
+logs/
+temp/
+chunks/
+
+# Temporary files
+*.tmp
+*.log
+*.out
+*.err
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Large data files
+*.fastq.gz
+*.bam
+*.sam
