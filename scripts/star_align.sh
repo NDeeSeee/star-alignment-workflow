@@ -24,14 +24,13 @@ GENOME="/data/salomonis2/Genomes/Star2pass-GRCH38/GRCh38.d1.vd1.fa"
 STAR_THREADS=8
 STAR_MEMORY="100000000000"
 
-# Output directories (consolidated)
+# Output directories (preserving input structure)
 OUTPUT_DIR="${WORKFLOW_DIR}/outputs"
 LOG_DIR="${WORKFLOW_DIR}/logs"
-BAM_DIR="${OUTPUT_DIR}/bams"
 TEMP_DIR="${OUTPUT_DIR}/temp"
 
-# Create directories
-mkdir -p "${OUTPUT_DIR}" "${LOG_DIR}" "${BAM_DIR}" "${TEMP_DIR}"
+# Create base directories
+mkdir -p "${OUTPUT_DIR}" "${LOG_DIR}" "${TEMP_DIR}"
 
 # Logging function
 log() {
@@ -77,10 +76,18 @@ if [[ ! -f "${R1_PATH}" ]] || [[ ! -f "${R2_PATH}" ]]; then
     exit 1
 fi
 
-# Create sample directories
+# Extract directory structure from input path
+INPUT_DIR=$(dirname "${R1_PATH}")
+# Convert input path to output path (replace base directory)
+OUTPUT_BASE_DIR="${OUTPUT_DIR}"
+BAM_OUTPUT_DIR="${INPUT_DIR/${BASE_DIR}/${OUTPUT_BASE_DIR}}"
+
+# Create sample directories preserving input structure
 SAMPLE_OUTPUT_DIR="${OUTPUT_DIR}/${SAMPLE_ID}"
-SAMPLE_BAM_DIR="${BAM_DIR}/${SAMPLE_ID}"
-mkdir -p "${SAMPLE_OUTPUT_DIR}" "${SAMPLE_BAM_DIR}"
+mkdir -p "${SAMPLE_OUTPUT_DIR}" "${BAM_OUTPUT_DIR}"
+
+log "📁 Input directory: ${INPUT_DIR}"
+log "📁 BAM output directory: ${BAM_OUTPUT_DIR}"
 
 # Load STAR module
 log "🔧 Loading STAR module..."
@@ -167,12 +174,12 @@ STAR --genomeDir "${SAMPLE_GENOME_DIR}" \
 
 log "✅ Final alignment completed successfully"
 
-# Move final BAM file
+# Move final BAM file to preserve input directory structure
 FINAL_BAM="${SAMPLE_OUTPUT_DIR}/${SAMPLE_ID}_final_Aligned.sortedByCoord.out.bam"
 if [[ -f "${FINAL_BAM}" ]]; then
-    mv "${FINAL_BAM}" "${SAMPLE_BAM_DIR}/${SAMPLE_ID}.bam"
-    BAM_SIZE=$(stat -c%s "${SAMPLE_BAM_DIR}/${SAMPLE_ID}.bam")
-    log "📦 BAM file created: ${SAMPLE_BAM_DIR}/${SAMPLE_ID}.bam ($(numfmt --to=iec ${BAM_SIZE}))"
+    mv "${FINAL_BAM}" "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.bam"
+    BAM_SIZE=$(stat -c%s "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.bam")
+    log "📦 BAM file created: ${BAM_OUTPUT_DIR}/${SAMPLE_ID}.bam ($(numfmt --to=iec ${BAM_SIZE}))"
 else
     log "❌ ERROR: Final BAM file not found"
     exit 1
@@ -180,12 +187,29 @@ fi
 
 # Generate alignment statistics
 log "📊 Generating alignment statistics..."
-if module load samtools/1.13.0 2>/dev/null && command -v samtools &> /dev/null; then
-    samtools flagstat "${SAMPLE_BAM_DIR}/${SAMPLE_ID}.bam" > "${SAMPLE_BAM_DIR}/${SAMPLE_ID}.flagstat"
-    log "📈 Alignment statistics saved"
+log "🔧 Checking samtools availability..."
+
+# Try to load samtools module
+if module load samtools/1.13.0 2>/dev/null; then
+    log "✅ samtools module loaded successfully"
+    if command -v samtools &> /dev/null; then
+        log "✅ samtools command available: $(samtools --version 2>&1 | head -1)"
+        samtools flagstat "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.bam" > "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.flagstat"
+        log "📈 Alignment statistics saved"
+    else
+        log "⚠️  samtools module loaded but command not found"
+        echo "samtools command not found after module load" > "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.flagstat"
+    fi
 else
-    echo "samtools not available - statistics skipped" > "${SAMPLE_BAM_DIR}/${SAMPLE_ID}.flagstat"
-    log "⚠️  samtools not available, skipping statistics"
+    log "⚠️  Failed to load samtools module, trying system samtools..."
+    if command -v samtools &> /dev/null; then
+        log "✅ System samtools available: $(samtools --version 2>&1 | head -1)"
+        samtools flagstat "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.bam" > "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.flagstat"
+        log "📈 Alignment statistics saved"
+    else
+        log "❌ No samtools available (module or system)"
+        echo "samtools not available - statistics skipped" > "${BAM_OUTPUT_DIR}/${SAMPLE_ID}.flagstat"
+    fi
 fi
 
 # Cleanup intermediate files

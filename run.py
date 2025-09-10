@@ -97,7 +97,7 @@ def create_chunks(chunk_size=None):
     
     # Get optimal chunk size
     if chunk_size is None:
-        optimal_chunk_size = resource_manager.calculate_optimal_chunk_size(total_samples, total_storage_gb)
+        optimal_chunk_size = resource_manager.calculate_optimal_chunk_size(total_samples)
         print_status(BLUE, f"🧠 Intelligent chunk sizing: {optimal_chunk_size} samples per chunk")
     else:
         optimal_chunk_size = chunk_size
@@ -165,7 +165,7 @@ def submit_jobs(chunk_id=None):
     
     # Check resource status
     print_status(BLUE, "🔍 Checking system resources...")
-    resources = resource_manager.get_system_resources()
+    resources = resource_manager.get_current_resources()
     if resources:
         print_status(BLUE, f"💾 Storage: {resources['storage']['usage_percent']:.1f}% used")
         print_status(BLUE, f"🖥️  CPU: {resources['cpu']['usage_percent']:.1f}% used")
@@ -204,8 +204,30 @@ def submit_jobs(chunk_id=None):
     
     print_status(BLUE, f"📦 Submitting {len(chunks_to_submit)} chunks...")
     
-    # Get job resources
-    job_resources = resource_manager.get_job_resources()
+    # Get job resources from advanced config
+    config_file = workflow_dir / "data" / "advanced_resource_config.json"
+    try:
+        with open(config_file, 'r') as f:
+            config = json.load(f)
+        # Extract basic job resources from advanced config
+        hpc_config = config.get('hpc_environment', {})
+        queues = hpc_config.get('queues', {})
+        normal_queue = queues.get('normal', {})
+        
+        job_resources = {
+            'cpus': normal_queue.get('max_cpu_per_job', 8),
+            'memory': f"{normal_queue.get('max_memory_per_job', 32)}GB",
+            'walltime': f"{normal_queue.get('max_walltime_hours', 72)}:00",
+            'queue': 'normal'
+        }
+    except (FileNotFoundError, json.JSONDecodeError):
+        # Fallback to default values
+        job_resources = {
+            'cpus': 8,
+            'memory': '32GB',
+            'walltime': '72:00',
+            'queue': 'normal'
+        }
     
     success_count = 0
     for chunk in chunks_to_submit:
@@ -403,7 +425,7 @@ def show_status():
     # Show system resources
     resource_manager = ResourceManager(workflow_dir)
     print_status(BLUE, "🔍 System Resources:")
-    resources = resource_manager.get_system_resources()
+    resources = resource_manager.get_current_resources()
     if resources:
         print(f"  Storage: {resources['storage']['usage_percent']:.1f}% used")
         print(f"  CPU: {resources['cpu']['usage_percent']:.1f}% used")
@@ -476,6 +498,174 @@ def show_help():
     print("  ✅ Storage monitoring")
     print("  ✅ Queue management")
     print("  ✅ Automatic cleanup")
+    print()
+    print("Advanced Features:")
+    print("  python3 run.py storage       # Storage failure prediction")
+    print("  python3 run.py exhaustion    # Resource exhaustion prediction")
+    print("  python3 run.py topology      # Network topology analysis")
+    print("  python3 run.py hpc           # HPC system integration")
+
+def show_storage_prediction():
+    """Show storage failure prediction."""
+    print_status(BLUE, "🔮 Storage Failure Prediction")
+    print_status(BLUE, "=" * 40)
+    
+    try:
+        workflow_dir = Path.cwd()
+        resource_manager = ResourceManager(workflow_dir)
+        
+        # Get storage prediction
+        result = resource_manager.predict_storage_failure()
+        
+        if "error" in result:
+            print_status(RED, f"❌ Error: {result['error']}")
+            return
+        
+        # Display results
+        risk_color = RED if result["risk_level"] == "HIGH" else YELLOW if result["risk_level"] == "MEDIUM" else GREEN
+        print_status(risk_color, f"Risk Level: {result['risk_level']}")
+        print_status(BLUE, f"Failure Probability: {result['failure_probability']:.2%}")
+        print_status(BLUE, f"Time to Failure: {result['time_to_failure_hours']:.1f} hours")
+        
+        print_status(YELLOW, "\nPreventive Measures:")
+        for measure in result["preventive_measures"]:
+            print_status(YELLOW, f"  • {measure}")
+        
+        print_status(YELLOW, "\nRecommendations:")
+        for rec in result["recommendations"]:
+            print_status(YELLOW, f"  • {rec}")
+            
+    except Exception as e:
+        print_status(RED, f"❌ Error: {e}")
+
+def show_exhaustion_prediction():
+    """Show resource exhaustion prediction."""
+    print_status(BLUE, "🔮 Resource Exhaustion Prediction")
+    print_status(BLUE, "=" * 40)
+    
+    try:
+        workflow_dir = Path.cwd()
+        resource_manager = ResourceManager(workflow_dir)
+        
+        # Get exhaustion prediction
+        result = resource_manager.predict_resource_exhaustion()
+        
+        if "error" in result:
+            print_status(RED, f"❌ Error: {result['error']}")
+            return
+        
+        # Display overall risk
+        overall_risk = result["overall_risk"]
+        risk_color = RED if overall_risk["overall_risk_level"] == "CRITICAL" else YELLOW if overall_risk["overall_risk_level"] == "HIGH" else GREEN
+        print_status(risk_color, f"Overall Risk: {overall_risk['overall_risk_level']}")
+        
+        # Display individual resource risks
+        print_status(BLUE, "\nResource Risks:")
+        predictions = result["predictions"]
+        for resource, pred in predictions.items():
+            if resource != "queues":
+                risk_color = RED if pred["risk_level"] == "HIGH" else YELLOW if pred["risk_level"] == "MEDIUM" else GREEN
+                print_status(risk_color, f"  {resource.upper()}: {pred['risk_level']} ({pred['exhaustion_probability']:.1%})")
+        
+        # Display queue risks
+        if "queues" in predictions:
+            print_status(BLUE, "\nQueue Risks:")
+            for queue, pred in predictions["queues"].items():
+                risk_color = RED if pred["risk_level"] == "HIGH" else YELLOW if pred["risk_level"] == "MEDIUM" else GREEN
+                print_status(risk_color, f"  {queue}: {pred['risk_level']} ({pred['utilization']:.1%})")
+        
+        print_status(YELLOW, "\nRecommendations:")
+        for rec in result["recommendations"]:
+            print_status(YELLOW, f"  • {rec}")
+            
+    except Exception as e:
+        print_status(RED, f"❌ Error: {e}")
+
+def show_network_topology():
+    """Show network topology information."""
+    print_status(BLUE, "🌐 Network Topology Analysis")
+    print_status(BLUE, "=" * 40)
+    
+    try:
+        workflow_dir = Path.cwd()
+        resource_manager = ResourceManager(workflow_dir)
+        
+        # Get network topology
+        result = resource_manager.get_network_topology()
+        
+        if "error" in result:
+            print_status(RED, f"❌ Error: {result['error']}")
+            return
+        
+        # Display host info
+        host_info = result["host_info"]
+        print_status(GREEN, f"Hostname: {host_info['hostname']}")
+        print_status(BLUE, f"Platform: {host_info['platform']}")
+        print_status(BLUE, f"Architecture: {host_info['architecture'][0]}")
+        
+        # Display network interfaces
+        print_status(BLUE, f"\nNetwork Interfaces ({len(result['network_interfaces'])}):")
+        for interface, info in result["network_interfaces"].items():
+            status_color = GREEN if info["status"] == "up" else RED
+            print_status(status_color, f"  {interface}: {info['status']} {info.get('mac', '')}")
+        
+        # Display routing info
+        routing = result["routing_info"]
+        print_status(BLUE, f"\nDefault Gateway: {routing['default_gateway']}")
+        
+        # Display performance metrics
+        perf = result["performance_metrics"]
+        print_status(BLUE, f"\nNetwork Performance:")
+        print_status(BLUE, f"  Bytes Sent: {perf['bytes_sent']:,}")
+        print_status(BLUE, f"  Bytes Received: {perf['bytes_recv']:,}")
+        print_status(BLUE, f"  Error Rate: {perf['error_rate']:.2%}")
+        print_status(BLUE, f"  Drop Rate: {perf['drop_rate']:.2%}")
+        
+    except Exception as e:
+        print_status(RED, f"❌ Error: {e}")
+
+def show_hpc_info():
+    """Show HPC system information."""
+    print_status(BLUE, "🖥️  HPC System Integration")
+    print_status(BLUE, "=" * 40)
+    
+    try:
+        workflow_dir = Path.cwd()
+        resource_manager = ResourceManager(workflow_dir)
+        
+        # Get HPC system info
+        result = resource_manager.get_hpc_system_info()
+        
+        if "error" in result:
+            print_status(RED, f"❌ Error: {result['error']}")
+            return
+        
+        # Display scheduler info
+        print_status(GREEN, f"Scheduler Type: {result['scheduler_type']}")
+        print_status(BLUE, f"Available Commands: {len(result['available_commands'])}")
+        
+        if result['available_commands']:
+            print_status(BLUE, "Commands:")
+            for cmd in result['available_commands']:
+                print_status(BLUE, f"  • {cmd}")
+        
+        # Display queue info
+        if result['queue_info']:
+            print_status(BLUE, "\nQueue Information:")
+            for queue, info in result['queue_info'].items():
+                print_status(BLUE, f"  {queue}: {info}")
+        
+        # Display job info
+        if result['job_info']:
+            print_status(BLUE, "\nJob Information:")
+            for job, info in result['job_info'].items():
+                print_status(BLUE, f"  {job}: {info}")
+        
+        if not result['queue_info'] and not result['job_info']:
+            print_status(YELLOW, "No active queues or jobs detected")
+            
+    except Exception as e:
+        print_status(RED, f"❌ Error: {e}")
 
 def main():
     parser = argparse.ArgumentParser(description='STAR Alignment Workflow Controller')
@@ -521,6 +711,18 @@ def main():
     
     elif args.command == 'cleanup':
         cleanup_storage()
+    
+    elif args.command == 'storage':
+        show_storage_prediction()
+    
+    elif args.command == 'exhaustion':
+        show_exhaustion_prediction()
+    
+    elif args.command == 'topology':
+        show_network_topology()
+    
+    elif args.command == 'hpc':
+        show_hpc_info()
     
     else:
         print_status(RED, f"❌ Unknown command: {args.command}")

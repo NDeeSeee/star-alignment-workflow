@@ -208,9 +208,56 @@ python3 run.py status
 - **Empty wells**: 731 samples (filtered out)
 - **Small files**: <100KB (filtered out)
 
+## 🔮 **Advanced Features**
+
+The workflow includes sophisticated HPC resource management and predictive capabilities:
+
+### **Storage Failure Prediction**
+```bash
+python3 run.py storage
+```
+- **Real-time storage monitoring** with failure prediction
+- **Risk assessment** (LOW/MEDIUM/HIGH/CRITICAL)
+- **Preventive measures** and recommendations
+- **Time-to-failure estimation**
+
+### **Resource Exhaustion Prediction**
+```bash
+python3 run.py exhaustion
+```
+- **Multi-resource monitoring** (CPU, Memory, Storage, Queues)
+- **Exhaustion probability** calculation
+- **Queue utilization** analysis
+- **Optimization recommendations**
+
+### **Network Topology Awareness**
+```bash
+python3 run.py topology
+```
+- **Network interface discovery** and status
+- **Performance metrics** (bytes sent/received, error rates)
+- **Routing information** and connectivity
+- **Storage connectivity** analysis
+
+### **HPC System Integration**
+```bash
+python3 run.py hpc
+```
+- **Scheduler detection** (LSF, SLURM, PBS)
+- **Queue information** and job status
+- **Management system integration** (Ganglia, Nagios)
+- **System command availability**
+
+### **Intelligent Resource Management**
+- **Dynamic chunk sizing** based on system state
+- **Queue-aware job submission** with optimal resource allocation
+- **Cost optimization** across different queues
+- **Predictive job scheduling** with success probability estimation
+
 ---
 
 **Last Updated**: $(date)  
 **Status**: Production Ready ✅  
 **Focus**: SmartSeq2 Samples Only 🧬  
-**Infrastructure**: Streamlined & Optimized 🚀
+**Infrastructure**: Streamlined & Optimized 🚀  
+**Advanced Features**: HPC-Ready with Predictive Analytics 🔮

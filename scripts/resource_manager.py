@@ -18,6 +18,12 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 import logging
 
+# Import advanced features
+try:
+    from .advanced_features import StorageFailurePredictor, ResourceExhaustionPredictor, NetworkTopologyAwareness, HPCManagementIntegration
+except ImportError:
+    from advanced_features import StorageFailurePredictor, ResourceExhaustionPredictor, NetworkTopologyAwareness, HPCManagementIntegration
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -58,6 +64,12 @@ class AdvancedResourceManager:
         self.predictor = ResourcePredictor(self.history)
         self.cost_optimizer = CostOptimizer(self.config)
         self.workload_balancer = WorkloadBalancer(self.config)
+        
+        # Initialize advanced features
+        self.storage_predictor = StorageFailurePredictor(self.config)
+        self.exhaustion_predictor = ResourceExhaustionPredictor(self.config)
+        self.network_topology = NetworkTopologyAwareness(self.config)
+        self.hpc_integration = HPCManagementIntegration(self.config)
         
         # Start real-time monitoring
         self.monitor_thread = threading.Thread(target=self._monitor_resources, daemon=True)
@@ -551,6 +563,86 @@ class AdvancedResourceManager:
                 recommendations.append("Average job cost high - consider optimizing resource allocation")
                 
         return recommendations
+    
+    def predict_storage_failure(self, path: str = None) -> Dict:
+        """Predict storage failure for the given path"""
+        if path is None:
+            path = str(self.workflow_dir)
+        
+        # Get current storage usage
+        try:
+            statvfs = os.statvfs(path)
+            total_space = statvfs.f_frsize * statvfs.f_blocks
+            free_space = statvfs.f_frsize * statvfs.f_bavail
+            used_space = total_space - free_space
+            usage_percent = used_space / total_space
+            
+            # Estimate growth rate (simplified)
+            growth_rate = 0.05  # 5% per hour estimate
+            
+            return self.storage_predictor.predict_storage_failure(usage_percent, growth_rate)
+        except Exception as e:
+            logger.error(f"Error predicting storage failure: {e}")
+            return {"error": str(e)}
+    
+    def predict_resource_exhaustion(self) -> Dict:
+        """Predict resource exhaustion across all resource types"""
+        try:
+            # Get current resource usage
+            current_resources = self.get_current_resources()
+            
+            # Format for the exhaustion predictor
+            formatted_resources = {
+                'cpu': {
+                    'usage_percent': current_resources['cpu']['usage_percent'],
+                    'available': current_resources['cpu']['available']
+                },
+                'memory': {
+                    'usage_percent': current_resources['memory']['usage_percent'],
+                    'available_gb': current_resources['memory']['available_gb']
+                },
+                'storage': {
+                    'usage_percent': current_resources['storage']['usage_percent'],
+                    'free_gb': current_resources['storage']['free_gb']
+                },
+                'lsf': current_resources['lsf']
+            }
+            
+            return self.exhaustion_predictor.predict_resource_exhaustion(formatted_resources)
+        except Exception as e:
+            logger.error(f"Error predicting resource exhaustion: {e}")
+            return {"error": str(e)}
+    
+    def get_network_topology(self) -> Dict:
+        """Get network topology information"""
+        try:
+            return self.network_topology.discover_network_topology()
+        except Exception as e:
+            logger.error(f"Error getting network topology: {e}")
+            return {"error": str(e)}
+    
+    def get_hpc_system_info(self) -> Dict:
+        """Get HPC system information and integration status"""
+        try:
+            return self.hpc_integration.get_scheduler_info()
+        except Exception as e:
+            logger.error(f"Error getting HPC system info: {e}")
+            return {"error": str(e)}
+    
+    def optimize_for_topology(self, job_requirements: JobRequirements) -> Dict:
+        """Optimize job requirements based on network topology"""
+        try:
+            topology = self.get_network_topology()
+            job_req_dict = {
+                'cpus': job_requirements.cpus,
+                'memory_gb': job_requirements.memory_gb,
+                'storage_gb': job_requirements.storage_gb,
+                'walltime_hours': job_requirements.walltime_hours
+            }
+            return self.network_topology.optimize_for_topology(job_req_dict)
+        except Exception as e:
+            logger.error(f"Error optimizing for topology: {e}")
+            return {"error": str(e)}
 
 class AdvancedQueueManager:
     """Advanced queue management with intelligent selection"""

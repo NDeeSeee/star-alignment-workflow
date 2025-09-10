@@ -9,6 +9,7 @@ import csv
 import json
 import time
 import argparse
+import os
 from pathlib import Path
 from datetime import datetime
 import sys
@@ -20,7 +21,7 @@ class STARMonitor:
         self.workflow_dir = Path(workflow_dir)
         self.manifest_file = self.workflow_dir / "data" / "sample_manifest.csv"
         self.log_dir = self.workflow_dir / "logs"
-        self.bam_dir = self.workflow_dir / "bams"
+        self.bam_dir = self.workflow_dir / "outputs" / "bams"
         
     def get_lsf_status(self):
         """Get LSF job status."""
@@ -45,7 +46,15 @@ class STARMonitor:
         
         for sample in samples:
             sample_id = sample['sample_id']
-            bam_file = self.bam_dir / sample_id / f"{sample_id}.bam"
+            r1_path = sample['r1_path']
+            
+            # Extract directory structure from input path
+            input_dir = os.path.dirname(r1_path)
+            base_dir = "/data/salomonis-archive/czb-tabula-sapiens"
+            output_base_dir = str(self.workflow_dir / "outputs")
+            bam_output_dir = input_dir.replace(base_dir, output_base_dir)
+            
+            bam_file = Path(bam_output_dir) / f"{sample_id}.bam"
             if bam_file.exists() and bam_file.stat().st_size > 1000:
                 completed_samples += 1
         

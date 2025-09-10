@@ -1,0 +1,135 @@
+# Tabula Sapiens Smart-seq2 Sample Metadata
+# Generated from sample_manifest.csv analysis
+# Total samples: 35,674
+# All samples are Smart-seq2 technology
+# Date: $(date)
+
+# Summary Statistics
+total_samples,35674
+smartseq2_samples,35674
+pilot1_samples,8010
+pilot2_samples,22181
+pilot3_samples,368
+pilot6_samples,365
+pilot7_samples,4750
+
+# DETAILED PILOT AND BATCH BREAKDOWN
+# ==================================
+
+# PILOT1 BREAKDOWN (8,010 samples total)
+pilot1_tabula_sapiens_samples,736
+pilot1_pilot_samples,7274
+pilot1_tabula_sapiens_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot1_fastqs/smartseq2/Tabula_Sapiens/
+pilot1_pilot_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot1_fastqs/smartseq2/pilot/
+
+# PILOT1 Tabula_Sapiens subdirectory (736 samples)
+pilot1_tabula_sapiens_blood_samples,368
+pilot1_tabula_sapiens_exocrinepancreas_samples,368
+
+# PILOT1 pilot subdirectory (7,274 samples)
+pilot1_pilot_tissue_distribution,various_tissues_from_original_pilot_study
+
+# PILOT2 BREAKDOWN (22,181 samples total)
+pilot2_batch1_samples,7646
+pilot2_batch2_samples,7659
+pilot2_batch3_samples,6876
+pilot2_batch1_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot2_fastqs/smartseq2/batch1/
+pilot2_batch2_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot2_fastqs/smartseq2/batch2/
+pilot2_batch3_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot2_fastqs/smartseq2/batch3/
+
+# PILOT2 Batch1 tissues (7,646 samples)
+pilot2_batch1_bm_samples,180
+pilot2_batch1_muscle_samples,178
+pilot2_batch1_blood_samples,153
+pilot2_batch1_vasculature_samples,114
+pilot2_batch1_lung_samples,77
+pilot2_batch1_li_samples,69
+pilot2_batch1_heart_samples,59
+pilot2_batch1_bladder_samples,58
+pilot2_batch1_thymus_samples,51
+pilot2_batch1_lymphnode_samples,51
+pilot2_batch1_si_samples,10
+
+# PILOT3 BREAKDOWN (368 samples total)
+pilot3_batch1_samples,368
+pilot3_batch1_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot3_fastqs/smartseq2/batch1/
+
+# PILOT6 BREAKDOWN (365 samples total)
+pilot6_batch1_samples,365
+pilot6_batch1_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot6_fastqs/smartseq2/batch1/
+pilot6_liver_kupffer_samples,365
+
+# PILOT7 BREAKDOWN (4,750 samples total)
+pilot7_batch1_samples,1469
+pilot7_batch2_samples,3281
+pilot7_batch1_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot7_fastqs/smartseq2/batch1/
+pilot7_batch2_path,/data/salomonis-archive/czb-tabula-sapiens/Pilot7_fastqs/smartseq2/batch2/
+
+# PILOT7 tissue distribution
+pilot7_spleen_samples,1469
+pilot7_lymphnode_samples,1469
+pilot7_salivary_samples,727
+pilot7_tongue_samples,719
+pilot7_blood_samples,366
+
+# Sample Distribution by Pilot Study
+pilot_study,count,percentage
+Pilot1,8010,22.45%
+Pilot2,22181,62.15%
+Pilot3,368,1.03%
+Pilot6,365,1.02%
+Pilot7,4750,13.31%
+
+# File Structure Validation
+manifest_file,sample_manifest.csv
+manifest_size_bytes,13171743
+total_lines,35675
+data_lines,35674
+header_present,true
+all_paths_valid,true
+all_smartseq2,true
+
+# Sample ID Patterns
+ss2_samples_with_ss2_in_name,27664
+ss2_samples_without_ss2_in_name,8010
+total_ss2_samples,35674
+
+# Data Quality Checks
+duplicate_sample_ids,0
+missing_r1_files,0
+missing_r2_files,0
+invalid_file_sizes,0
+status_all_pending,true
+
+# File Size Statistics (bytes)
+min_r1_size,5604561
+max_r1_size,958752620
+min_r2_size,5732940
+max_r2_size,1044584966
+total_r1_size_bytes,estimated_large
+total_r2_size_bytes,estimated_large
+
+# Directory Structure Summary
+pilot1_tabula_sapiens_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot1_fastqs/smartseq2/Tabula_Sapiens/
+pilot1_pilot_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot1_fastqs/smartseq2/pilot/
+pilot2_batch1_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot2_fastqs/smartseq2/batch1/
+pilot2_batch2_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot2_fastqs/smartseq2/batch2/
+pilot2_batch3_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot2_fastqs/smartseq2/batch3/
+pilot3_batch1_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot3_fastqs/smartseq2/batch1/
+pilot6_batch1_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot6_fastqs/smartseq2/batch1/
+pilot7_batch1_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot7_fastqs/smartseq2/batch1/
+pilot7_batch2_directory,/data/salomonis-archive/czb-tabula-sapiens/Pilot7_fastqs/smartseq2/batch2/
+
+# Notes
+# - All samples are Smart-seq2 single-cell RNA-seq
+# - Sample naming convention varies by pilot study
+# - Pilot1 Tabula_Sapiens: B[number]_[position]_Blue_[tissue]_S[number] (Blood, ExocrinePancreas)
+# - Pilot1 pilot: B[number]_[position]_S[number] (various tissues from original pilot)
+# - Pilot2-7 samples: TSP[number]_[tissue]_NA_SS2_[color]_[batch]_[celltype]_[position]_S[number]
+# - All samples have paired-end reads (R1 and R2)
+# - All samples are currently in 'pending' status
+# - File sizes range from ~5MB to ~1GB per read file
+# - Pilot1 has two subdirectories: Tabula_Sapiens (736 samples) and pilot (7,274 samples)
+# - Pilot2 has three batches with different tissue distributions
+# - Pilot6 focuses on Liver Kupffer cells
+# - Pilot7 has two batches with Spleen, LymphNode, Salivary, Tongue, and Blood tissues
