@@ -15,7 +15,7 @@ from datetime import datetime
 
 # Import resource manager
 sys.path.append(str(Path(__file__).parent / "scripts"))
-from resource_manager import ResourceManager
+from resource_manager import AdvancedResourceManager as ResourceManager
 
 # Colors for output
 RED = '\033[0;31m'
@@ -440,7 +440,7 @@ def show_resources():
     """Show detailed resource information."""
     workflow_dir = Path.cwd()
     resource_manager = ResourceManager(workflow_dir)
-    print(resource_manager.generate_resource_report())
+    print(resource_manager.generate_advanced_report())
 
 def show_help():
     """Show help message."""

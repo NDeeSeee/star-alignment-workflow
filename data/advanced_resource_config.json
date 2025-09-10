@@ -1,0 +1,89 @@
+{
+  "hpc_environment": {
+    "cluster_name": "your_cluster",
+    "scheduler": "LSF",
+    "queues": {
+      "normal": {
+        "max_jobs": 100,
+        "max_cpu_per_job": 16,
+        "max_memory_per_job": 256,
+        "max_walltime_hours": 168,
+        "cost_per_cpu_hour": 0.1,
+        "priority": 1,
+        "speed_factor": 1.0
+      },
+      "hiprio": {
+        "max_jobs": 50,
+        "max_cpu_per_job": 32,
+        "max_memory_per_job": 512,
+        "max_walltime_hours": 72,
+        "cost_per_cpu_hour": 0.2,
+        "priority": 2,
+        "speed_factor": 1.5
+      },
+      "long": {
+        "max_jobs": 20,
+        "max_cpu_per_job": 8,
+        "max_memory_per_job": 128,
+        "max_walltime_hours": 720,
+        "cost_per_cpu_hour": 0.05,
+        "priority": 3,
+        "speed_factor": 0.7
+      },
+      "gpu": {
+        "max_jobs": 10,
+        "max_cpu_per_job": 16,
+        "max_memory_per_job": 256,
+        "max_walltime_hours": 48,
+        "cost_per_cpu_hour": 0.5,
+        "priority": 4,
+        "speed_factor": 2.0
+      }
+    }
+  },
+  "optimization": {
+    "chunk_strategies": {
+      "storage_optimized": {
+        "max_chunk_size": 500,
+        "storage_threshold": 0.85,
+        "priority": "storage_efficiency"
+      },
+      "time_optimized": {
+        "max_chunk_size": 2000,
+        "storage_threshold": 0.95,
+        "priority": "speed"
+      },
+      "cost_optimized": {
+        "max_chunk_size": 1000,
+        "storage_threshold": 0.9,
+        "priority": "cost_efficiency"
+      },
+      "balanced": {
+        "max_chunk_size": 1000,
+        "storage_threshold": 0.9,
+        "priority": "balanced"
+      }
+    },
+    "prediction": {
+      "enable_ml_prediction": true,
+      "prediction_horizon_hours": 24,
+      "confidence_threshold": 0.8,
+      "model_update_frequency": "daily"
+    },
+    "cost_optimization": {
+      "max_cost_per_job": 100.0,
+      "cost_weight": 0.3,
+      "time_weight": 0.4,
+      "reliability_weight": 0.3
+    }
+  },
+  "monitoring": {
+    "update_interval_seconds": 30,
+    "history_retention_days": 30,
+    "alert_thresholds": {
+      "storage_usage": 0.95,
+      "queue_wait_time": 24,
+      "job_failure_rate": 0.1
+    }
+  }
+}
